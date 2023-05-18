@@ -1,0 +1,86 @@
+---
+title: "CodigoFuenteProyecto_AdrianaMaldonado_YadiraCordero"
+author: "Adriana Maldonado, Yadira Cordero"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(markovchain)
+```
+
+**Proyecto Final: Problema de llenado de botellas**
+
+Una empresa en Ramos Arizpe tiene una máquina que llena botellas de agua durante todo el turno. El proceso de llenado se clasifica en tres estados: estado S0 si no se ha llenado ninguna botella, estado S1 si se han llenado de 1 a 9 botellas y estado S2 si se han llenado 10 o más botellas. Las siguientes reglas se aplican al proceso de llenado:
+
+Si el sistema se encuentra en el estado S0, hay una probabilidad del 100% de pasar a la siguiente etapa.
+Si el sistema se encuentra en el estado S1, hay una probabilidad del 50% de permanecer en el mismo estado S1 y una probabilidad del 50% de avanzar al estado S2 en la siguiente etapa.
+Una vez que el sistema se encuentra en el estado S2, no hay posibilidad de regresar al estado S1. Existe una probabilidad del 100% de permanecer en el estado S2 en la siguiente etapa.
+Se desean determinar las siguientes probabilidades:
+
+$$
+Estados\ \ \ S0\ \ \ \ S1\ \ \ \ S2\ \ \ \ \ \\
+P=\
+    \begin{bmatrix}
+    0 & 1 & 0\\\
+    0.5 & 0 & 0,5 \\
+    0 & 0 & 1 \\
+    \end{bmatrix}
+$$
+```{r}
+#Esta cadena de Markov es para poderla imprimir en el plot
+stateNames = c("S0","S1","S2")
+mc<-new("markovchain",transitionMatrix=matrix(c(0,1,0,
+                                                0.5,0,0.5,
+                                                0,0,1),byrow = TRUE,nrow = 3,dimnames = list(stateNames,stateNames)))
+```
+
+```{r}
+#Y esta matriz es para poder hacer las operaciones
+P <- matrix(c(0, 1, 0,
+              0.5, 0, 0.5,
+              0, 0, 1), nrow = 3, byrow = TRUE,
+            dimnames = list(c("S0", "S1", "S2"), c("S0", "S1", "S2")))
+```
+
+
+```{r}
+#Ahora dibujamos el diagrama de trasición de estados
+plot(mc)
+```
+
+```{r}
+#Usamos summary para ver el conjunto de datos que tenemos
+summary(mc)
+```
+
+i) La probabilidad de que después de 5 etapas de llenado el sistema se encuentre en el estado S2.
+
+```{r}
+#Calculamos la probabilidad
+prob_i <- P %*% P %*% P %*% P %*% P
+prob_i <- prob_i[1, 3]
+prob_i
+```
+*La probabilidad de que después de 5 etapas de llenado el sistema se encuentre en el estado S2 es del 75%*
+
+
+ii) La probabilidad de que después de 3 etapas de llenado el sistema se encuentre en el estado S1, dado que en la etapa inicial se encontraba en el estado S0.
+```{r}
+prob_ii <- P %*% P %*% P
+prob_ii <- prob_ii[1,2]
+prob_ii
+```
+*La probabilidad de que después de 3 etapas de llenado el sistema se encuentre en el estado S1, dado que estaba en el estado S0 es del 50%*
+
+
+iii) La probabilidad de que después de 2 etapas de llenado el sistema se encuentre en el estado S0, dado que en la primera etapa se encontraba en el estado S1 y en la segunda etapa se encontraba en el estado S2.
+```{r}
+prob_iii <- P %*% P
+prob_iii <- prob_iii[2, 1] * P[3, 2]
+prob_iii
+```
+*La probabilidad de que después de 2 etapas de llenado el sistema se encuentre en el estado S0, dado que en la primera etapa se encontraba en el estado S1 y en la segunda etapa se encontraba en el estado S2 es 0, ya que dado el sistema no hay forma de que el sistema pueda volver al estado S0 en la siguiente etapa*
